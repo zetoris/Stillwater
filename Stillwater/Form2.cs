@@ -15,13 +15,10 @@ namespace Stillwater
     public partial class Form2 : Form
     {
         string localServerURL;
-        string localServerIP = File.ReadAllText("localServerIP");//"127.0.0.1";
+        string mainServerIP = "";
+        string mainServerPort = "";
         int localServerPort;
 
-
-        
-        
-            
         bool localServerWorking = true;
 
         private Timer tmrPing;//таймер проверки доступности сервера
@@ -39,8 +36,10 @@ namespace Stillwater
             button_server_status.Click += new EventHandler(button_server_status_Click);
            
             label_logo.Click += new EventHandler(label_logo_Click);
-            
-            
+
+            if (File.Exists(@"localServerIP")) { mainServerIP = File.ReadAllText("localServerIP"); } else { File.WriteAllText("localServerIP", @"127.0.0.1"); }
+            if (File.Exists(@"localServerPort")) { mainServerPort = File.ReadAllText("localServerPort"); } else { File.WriteAllText("localServerPort", @"1984"); }
+
             webBrowser.Navigated += new WebBrowserNavigatedEventHandler(webBrowser_Navigated);
 
             tmrPing = new Timer();
@@ -53,15 +52,14 @@ namespace Stillwater
             string porttemp = File.ReadAllText("localServerPort");
             Int32.TryParse(porttemp, out localServerPort);// 80;
 
-            localServerURL = "http://"+ localServerIP+":"+localServerPort;
+            localServerURL = "http://"+ mainServerIP + ":"+localServerPort;
             webBrowser.Navigate(localServerURL);
-            //webBrowser.Document.ExecCommand("ClearAuthenticationCache", false, null);
         }
 
 
         private void tmrPing_Tick(object sender, EventArgs e)
         {
-            bool ping = PingHost(localServerIP, localServerPort);
+            bool ping = PingHost(mainServerIP, localServerPort);
             if (ping)
             {
                 button_server_status.Image = global::Stillwater.Properties.Resources.icon_ok2;
@@ -101,24 +99,6 @@ namespace Stillwater
                 return true;
             }
 
-            /*   try
-               {
-                   using (var client = new TcpClient())
-                   {
-                       if (!client.ConnectAsync(_HostURI, _PortNumber).Wait(1000))
-                       {
-                           return false;
-                       }
-                       else
-                       {
-                           return true;
-                       }                 
-                   }
-               }
-               catch
-               {
-                   return false;
-               }*/
         }
 
 
